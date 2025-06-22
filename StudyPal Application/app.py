@@ -9,7 +9,7 @@ from collections import Counter
 from wordcloud import WordCloud
 import base64
 
-# 📥 Auto-download required NLTK data
+# 🧠 NLTK Downloads
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -21,12 +21,13 @@ except LookupError:
     nltk.download('stopwords')
 
 from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import word_tokenize
+from nltk.tokenize.punkt import PunktSentenceTokenizer
 
 # 🌐 App Config
 st.set_page_config(page_title="🧠 StudyPal – AI-Powered Learning Assistant", layout="wide")
 
-# 💄 Styling
+# 💄 Custom Styling
 st.markdown("""
 <style>
 body {
@@ -97,7 +98,8 @@ if uploaded_file:
     with tab1:
         st.subheader("📝 Text Summarization")
         if st.button("Generate Summary"):
-            sentences = sent_tokenize(text)
+            tokenizer = PunktSentenceTokenizer()
+            sentences = tokenizer.tokenize(text)
             words = word_tokenize(text.lower())
             stop_words = set(stopwords.words("english"))
 
@@ -135,7 +137,8 @@ if uploaded_file:
         st.pyplot(fig1)
 
         st.subheader("📈 Sentence Length Histogram")
-        sentences = sent_tokenize(text)
+        tokenizer = PunktSentenceTokenizer()
+        sentences = tokenizer.tokenize(text)
         sent_lengths = [len(sent.split()) for sent in sentences]
         fig2, ax2 = plt.subplots()
         ax2.hist(sent_lengths, bins=10, color='coral', edgecolor='black')
