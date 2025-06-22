@@ -53,6 +53,7 @@ st.sidebar.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", widt
 st.sidebar.title("StudyPal AI")
 st.sidebar.markdown("Your Personal AI-Powered Learning Assistant")
 st.sidebar.info("✨ Built with Streamlit + NLP + Visualizations")
+st.sidebar.markdown("👨‍💻 Created by **SantoshSujith Chavva**")
 
 # 🏷️ Title
 st.title("📚 StudyPal – Smart Document Analyzer & Learning Companion")
@@ -179,3 +180,6 @@ if uploaded_file:
             st.markdown(href, unsafe_allow_html=True)
         else:
             st.warning("Please generate a summary first.")
+
+# ➕ Footer Attribution
+st.markdown("<hr><center>👨‍💻 Developed by <b>SantoshSujith Chavva</b> | © 2025 StudyPal</center>", unsafe_allow_html=True)
