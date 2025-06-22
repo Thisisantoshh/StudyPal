@@ -9,25 +9,20 @@ from collections import Counter
 from wordcloud import WordCloud
 import base64
 
-# 🧠 NLTK Downloads
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-
+# 🔁 Download NLTK data if missing
 try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
     nltk.download('stopwords')
 
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 from nltk.tokenize.punkt import PunktSentenceTokenizer
+from nltk.tokenize import TreebankWordTokenizer
 
-# 🌐 App Config
+# ⚙️ Streamlit Config
 st.set_page_config(page_title="🧠 StudyPal – AI-Powered Learning Assistant", layout="wide")
 
-# 💄 Custom Styling
+# 🎨 Custom Style
 st.markdown("""
 <style>
 body {
@@ -53,13 +48,13 @@ body {
 </style>
 """, unsafe_allow_html=True)
 
-# 🧠 Sidebar Info
+# 🧭 Sidebar
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100)
 st.sidebar.title("StudyPal AI")
 st.sidebar.markdown("Your Personal AI-Powered Learning Assistant")
 st.sidebar.info("✨ Built with Streamlit + NLP + Visualizations")
 
-# 🏷️ Title & Description
+# 🏷️ Title
 st.title("📚 StudyPal – Smart Document Analyzer & Learning Companion")
 st.markdown("""
 Welcome to **StudyPal** — your all-in-one educational toolkit! 🎓
@@ -98,9 +93,11 @@ if uploaded_file:
     with tab1:
         st.subheader("📝 Text Summarization")
         if st.button("Generate Summary"):
-            tokenizer = PunktSentenceTokenizer()
-            sentences = tokenizer.tokenize(text)
-            words = word_tokenize(text.lower())
+            sentence_tokenizer = PunktSentenceTokenizer()
+            word_tokenizer = TreebankWordTokenizer()
+
+            sentences = sentence_tokenizer.tokenize(text)
+            words = word_tokenizer.tokenize(text.lower())
             stop_words = set(stopwords.words("english"))
 
             word_frequencies = {}
@@ -114,7 +111,7 @@ if uploaded_file:
 
             sentence_scores = {}
             for sent in sentences:
-                for word in word_tokenize(sent.lower()):
+                for word in word_tokenizer.tokenize(sent.lower()):
                     if word in word_frequencies:
                         if len(sent.split(" ")) < 30:
                             sentence_scores[sent] = sentence_scores.get(sent, 0) + word_frequencies[word]
@@ -125,7 +122,8 @@ if uploaded_file:
 
     with tab2:
         st.subheader("📊 Keyword Frequency Analysis")
-        words = word_tokenize(text.lower())
+        word_tokenizer = TreebankWordTokenizer()
+        words = word_tokenizer.tokenize(text.lower())
         clean_words = [word for word in words if word.isalpha() and word not in stopwords.words("english")]
         freq_dist = Counter(clean_words)
         top_words = freq_dist.most_common(10)
@@ -137,8 +135,8 @@ if uploaded_file:
         st.pyplot(fig1)
 
         st.subheader("📈 Sentence Length Histogram")
-        tokenizer = PunktSentenceTokenizer()
-        sentences = tokenizer.tokenize(text)
+        sentence_tokenizer = PunktSentenceTokenizer()
+        sentences = sentence_tokenizer.tokenize(text)
         sent_lengths = [len(sent.split()) for sent in sentences]
         fig2, ax2 = plt.subplots()
         ax2.hist(sent_lengths, bins=10, color='coral', edgecolor='black')
