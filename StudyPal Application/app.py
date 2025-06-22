@@ -1,8 +1,6 @@
 import streamlit as st
 import pdfplumber
 import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
 import heapq
 import string
 import re
@@ -11,10 +9,24 @@ from collections import Counter
 from wordcloud import WordCloud
 import base64
 
-nltk.download("punkt")
-nltk.download("stopwords")
+# 📥 Auto-download required NLTK data
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+
+# 🌐 App Config
 st.set_page_config(page_title="🧠 StudyPal – AI-Powered Learning Assistant", layout="wide")
+
+# 💄 Styling
 st.markdown("""
 <style>
 body {
@@ -40,11 +52,13 @@ body {
 </style>
 """, unsafe_allow_html=True)
 
+# 🧠 Sidebar Info
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100)
 st.sidebar.title("StudyPal AI")
 st.sidebar.markdown("Your Personal AI-Powered Learning Assistant")
 st.sidebar.info("✨ Built with Streamlit + NLP + Visualizations")
 
+# 🏷️ Title & Description
 st.title("📚 StudyPal – Smart Document Analyzer & Learning Companion")
 st.markdown("""
 Welcome to **StudyPal** — your all-in-one educational toolkit! 🎓
@@ -57,6 +71,7 @@ Welcome to **StudyPal** — your all-in-one educational toolkit! 🎓
 - Export results to text
 """)
 
+# 📤 File Upload
 uploaded_file = st.file_uploader("📤 Upload your PDF or Text file", type=["pdf", "txt"])
 
 text = ""
@@ -91,7 +106,7 @@ if uploaded_file:
                 if word not in stop_words and word.isalpha():
                     word_frequencies[word] = word_frequencies.get(word, 0) + 1
 
-            max_freq = max(word_frequencies.values())
+            max_freq = max(word_frequencies.values(), default=1)
             for word in word_frequencies:
                 word_frequencies[word] /= max_freq
 
@@ -113,7 +128,7 @@ if uploaded_file:
         freq_dist = Counter(clean_words)
         top_words = freq_dist.most_common(10)
 
-        labels, counts = zip(*top_words)
+        labels, counts = zip(*top_words) if top_words else ([], [])
         fig1, ax1 = plt.subplots()
         ax1.bar(labels, counts, color='teal')
         plt.xticks(rotation=45)
