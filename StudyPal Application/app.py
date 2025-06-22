@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from wordcloud import WordCloud
 import base64
-import difflib
 
 # 🔁 Download NLTK data if missing
 try:
@@ -66,8 +65,8 @@ Welcome to **StudyPal** — your all-in-one educational toolkit! 🎓
 - Generate summaries, word clouds & keyword analytics
 - Detect emails/URLs
 - View sentence structure patterns
-- Export results to text
 - Ask document-based questions
+- Export results to text
 """)
 
 # 📤 File Upload
@@ -190,15 +189,20 @@ if uploaded_file:
         question = st.text_input("Type your question:")
 
         if question:
+            from sentence_transformers import SentenceTransformer, util
+
             sentence_tokenizer = PunktSentenceTokenizer()
             sentences = sentence_tokenizer.tokenize(text)
 
-            best_match = difflib.get_close_matches(question, sentences, n=1, cutoff=0.2)
+            model = SentenceTransformer('all-MiniLM-L6-v2')
+            embeddings = model.encode(sentences, convert_to_tensor=True)
+            q_embedding = model.encode(question, convert_to_tensor=True)
 
-            if best_match:
-                st.success(f"📌 Answer: {best_match[0]}")
-            else:
-                st.warning("Sorry, no relevant answer found.")
+            scores = util.cos_sim(q_embedding, embeddings)[0]
+            best_idx = scores.argmax().item()
+            best_sentence = sentences[best_idx]
+
+            st.success(f"📌 Answer: {best_sentence}")
 
 # ➕ Footer Attribution
 st.markdown("<hr><center>👨‍💻 Developed by <b>SantoshSujith Chavva</b> | © 2025 StudyPal</center>", unsafe_allow_html=True)
