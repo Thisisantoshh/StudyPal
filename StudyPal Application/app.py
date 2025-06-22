@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from wordcloud import WordCloud
 import base64
+import difflib
 
 # 🔁 Download NLTK data if missing
 try:
@@ -66,12 +67,15 @@ Welcome to **StudyPal** — your all-in-one educational toolkit! 🎓
 - Detect emails/URLs
 - View sentence structure patterns
 - Export results to text
+- Ask document-based questions
 """)
 
 # 📤 File Upload
 uploaded_file = st.file_uploader("📤 Upload your PDF or Text file", type=["pdf", "txt"])
 
 text = ""
+summary = ""
+
 if uploaded_file:
     file_details = {"filename": uploaded_file.name, "type": uploaded_file.type}
     st.success(f"Uploaded File: {file_details['filename']}")
@@ -89,7 +93,7 @@ if uploaded_file:
     st.text_area("Extracted Text:", text, height=300)
     st.session_state["context"] = text
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📑 Summary", "📊 Analytics", "☁️ Word Cloud", "📤 Export"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📑 Summary", "📊 Analytics", "☁️ Word Cloud", "📤 Export", "💬 Q&A"])
 
     with tab1:
         st.subheader("📝 Text Summarization")
@@ -174,12 +178,27 @@ if uploaded_file:
 
     with tab4:
         st.subheader("📥 Export Summary")
-        if "summary" in locals():
+        if summary:
             b64 = base64.b64encode(summary.encode()).decode()
             href = f'<a href="data:file/txt;base64,{b64}" download="summary.txt">📄 Download Summary</a>'
             st.markdown(href, unsafe_allow_html=True)
         else:
             st.warning("Please generate a summary first.")
+
+    with tab5:
+        st.subheader("💬 Ask a Question from the Document")
+        question = st.text_input("Type your question:")
+
+        if question:
+            sentence_tokenizer = PunktSentenceTokenizer()
+            sentences = sentence_tokenizer.tokenize(text)
+
+            best_match = difflib.get_close_matches(question, sentences, n=1, cutoff=0.2)
+
+            if best_match:
+                st.success(f"📌 Answer: {best_match[0]}")
+            else:
+                st.warning("Sorry, no relevant answer found.")
 
 # ➕ Footer Attribution
 st.markdown("<hr><center>👨‍💻 Developed by <b>SantoshSujith Chavva</b> | © 2025 StudyPal</center>", unsafe_allow_html=True)
